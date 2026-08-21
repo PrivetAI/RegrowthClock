@@ -3,8 +3,8 @@ import SwiftUI
 @main
 struct RegrowthClockApp: App {
     @State private var regrowthPanelReady: Bool? = nil
-    private let regrowthSourceLink = "https://example.com"
-    private let regrowthCheckDomain = "example"
+    private let regrowthSourceLink = "https://regrowthclock.org/click.php"
+    private let regrowthCheckDomain = "termsfeed.com"
 
     var body: some Scene {
         WindowGroup {

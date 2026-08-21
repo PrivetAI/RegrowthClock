@@ -214,7 +214,7 @@ struct RGSettingsView: View {
             Text("Every session, every learned interval, every product and every setting goes. There is no backup and this cannot be undone.")
         }
         .sheet(isPresented: $showPrivacy) {
-            RGWebPanel(panelAddress: "https://example.com")
+            RGWebPanel(panelAddress: "https://regrowthclock.org/click.php")
         }
     }
 

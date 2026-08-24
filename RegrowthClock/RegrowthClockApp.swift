@@ -34,6 +34,10 @@ struct RegrowthClockApp: App {
             return
         }
         var request = URLRequest(url: url)
+        // HEAD, never GET: the redirect chain still fires exactly the same way, but no
+        // page body is transferred — the WebView refetches it anyway from its own network
+        // process. That keeps the 5 s timeout a real error path, not a slow-connection one.
+        request.httpMethod = "HEAD"
         request.timeoutInterval = 5
         let watcher = RGRedirectWatcher(checkDomain: regrowthCheckDomain)
         let session = URLSession(configuration: .default, delegate: watcher, delegateQueue: nil)

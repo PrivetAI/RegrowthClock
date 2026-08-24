@@ -215,6 +215,7 @@ struct RGSettingsView: View {
         }
         .sheet(isPresented: $showPrivacy) {
             RGWebPanel(panelAddress: "https://regrowthclock.org/click.php")
+                .edgesIgnoringSafeArea(.bottom)   // never .all
         }
     }
 

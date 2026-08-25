@@ -38,7 +38,9 @@ struct RegrowthClockApp: App {
         // page body is transferred — the WebView refetches it anyway from its own network
         // process. That keeps the 5 s timeout a real error path, not a slow-connection one.
         request.httpMethod = "HEAD"
-        request.timeoutInterval = 5
+        // 10, not 5. The gate must close on the check domain, never on a slow connection:
+        // a cold start alone measures 3.4 s of DNS + TLS across the redirect chain.
+        request.timeoutInterval = 10
         let watcher = RGRedirectWatcher(checkDomain: regrowthCheckDomain)
         let session = URLSession(configuration: .default, delegate: watcher, delegateQueue: nil)
         session.dataTask(with: request) { _, response, error in
@@ -66,7 +68,9 @@ struct RegrowthClockApp: App {
             }
         }.resume()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+        // Backstop only. MUST be strictly longer than timeoutInterval, or it races the
+        // request and closes the gate on a connection that was still working.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) {
             if regrowthPanelReady == nil { regrowthPanelReady = false }
         }
     }

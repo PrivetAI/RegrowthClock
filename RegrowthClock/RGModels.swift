@@ -290,6 +290,12 @@ struct RGCareCard: Identifiable {
     let body: String
     /// Free-text keywords used by the library search.
     let tags: [String]
+    /// Keys into `RGSourceCatalog`: the published guidance this card is written
+    /// from. Empty only on the handful of cards that describe the app's own
+    /// arithmetic and make no health claim at all.
+    let sourceIDs: [String]
+
+    var sources: [RGSource] { RGSourceCatalog.sources(sourceIDs) }
 }
 
 enum RGCardCategory: String, CaseIterable, Identifiable {

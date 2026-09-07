@@ -207,6 +207,12 @@ struct RGOnboardingFlow: View {
                     .foregroundColor(RGTheme.inkSoft)
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
+                RGDivider()
+                Text("Every care card cites its sources. The guidance comes from national health services, dermatology associations, medicine and device regulators, and peer-reviewed literature. Each card lists its own citations at the foot of the card, and all \(RGSourceCatalog.all.count) are collected under Settings, Sources and references.")
+                    .font(RGFont.body(13))
+                    .foregroundColor(RGTheme.inkSoft)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Button(action: { acknowledged.toggle() }) {

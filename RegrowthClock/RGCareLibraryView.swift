@@ -15,7 +15,30 @@ struct RGCareLibraryView: View {
 
     var body: some View {
         RGSubScreen(title: "Care card library",
-                    subtitle: "\(RGCareLibrary.all.count) authored entries across \(RGCardCategory.allCases.count) categories") {
+                    subtitle: "\(RGCareLibrary.all.count) entries across \(RGCardCategory.allCases.count) categories, each with its published sources") {
+
+            NavigationLink(destination: RGSourceListView()) {
+                RGCard(accent: RGTheme.slateBlue) {
+                    HStack(alignment: .top, spacing: 11) {
+                        RGIconView(glyph: .book, side: 19, color: RGTheme.slateBlue)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Sources and references")
+                                .font(RGFont.heading(14))
+                                .foregroundColor(RGTheme.ink)
+                            Text("Every card here is written from published guidance and lists its own citations at the foot of the card. Tap to see all \(RGSourceCatalog.all.count) sources in one place.")
+                                .font(RGFont.body(11.5))
+                                .foregroundColor(RGTheme.inkSoft)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 4)
+                        RGIconView(glyph: .chevronRight, side: 14, color: RGTheme.inkFaint)
+                            .padding(.top, 3)
+                    }
+                    .contentShape(Rectangle())
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
 
             searchField
 
@@ -57,7 +80,7 @@ struct RGCareLibraryView: View {
                 }
             }
 
-            RGDisclaimerNote(text: "These cards are general information written for a general reader. They are not personal instructions and they do not replace advice from a qualified clinician.")
+            RGDisclaimerNote(text: "These cards are general information written for a general reader, drawn from the published sources cited on each card. They are not personal instructions and they do not replace advice from a qualified clinician.")
         }
     }
 

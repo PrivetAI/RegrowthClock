@@ -44,6 +44,8 @@ struct RGZoneDetailView: View {
         let used = store.methodsUsed(inZone: z.id)
         let unused = RGMethodCatalog.all.map { $0.id }.filter { !used.contains($0) }
         let zoneSessions = store.sessions(zoneID: z.id)
+        let zoneCards = RGCareLibrary.cards(z.cardIDs)
+        let zoneSources = RGSourceCatalog.union(of: zoneCards)
 
         return RGSubScreen(title: z.name, subtitle: z.group.title) {
 
@@ -140,11 +142,26 @@ struct RGZoneDetailView: View {
             }
 
             RGSectionHeader(text: "Care cards for this zone")
-            ForEach(RGCareLibrary.cards(z.cardIDs)) { card in
+            ForEach(zoneCards) { card in
                 NavigationLink(destination: RGCareCardView(card: card)) {
                     RGCareCardRow(card: card)
                 }
                 .buttonStyle(PlainButtonStyle())
+            }
+
+            if !zoneSources.isEmpty {
+                RGSectionHeader(text: "Sources for this zone",
+                                detail: "\(zoneSources.count)")
+                RGCard(accent: RGTheme.slateBlue) {
+                    Text("The care note above, and the cards listed with it, are written from the published guidance below. Tap any entry to open the original page.")
+                        .font(RGFont.body(11.5))
+                        .foregroundColor(RGTheme.inkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ForEach(Array(zoneSources.enumerated()), id: \.element.id) { pair in
+                        RGDivider()
+                        RGSourceRow(source: pair.element, index: pair.offset + 1)
+                    }
+                }
             }
 
             RGDisclaimerNote()
@@ -356,6 +373,17 @@ struct RGCareCardRow: View {
                         .foregroundColor(RGTheme.inkSoft)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
+                    if !card.sourceIDs.isEmpty {
+                        HStack(spacing: 4) {
+                            RGIconView(glyph: .book, side: 11, color: RGTheme.slateBlue, lineWidth: 1.3)
+                            Text(card.sourceIDs.count == 1
+                                 ? "1 cited source"
+                                 : "\(card.sourceIDs.count) cited sources")
+                                .font(RGFont.label(10))
+                                .foregroundColor(RGTheme.slateBlue)
+                        }
+                        .padding(.top, 1)
+                    }
                 }
                 Spacer(minLength: 4)
                 RGIconView(glyph: .chevronRight, side: 14, color: RGTheme.inkFaint)
@@ -384,6 +412,31 @@ struct RGCareCardView: View {
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            RGCardSources(card: card)
+
+            NavigationLink(destination: RGSourceListView()) {
+                RGCard(padding: 12) {
+                    HStack(spacing: 10) {
+                        RGIconView(glyph: .book, side: 17, color: RGTheme.sageDeep)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("All sources and references")
+                                .font(RGFont.heading(13))
+                                .foregroundColor(RGTheme.ink)
+                            Text("Every publisher cited anywhere in the library")
+                                .font(RGFont.body(11))
+                                .foregroundColor(RGTheme.inkSoft)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 4)
+                        RGIconView(glyph: .chevronRight, side: 14, color: RGTheme.inkFaint)
+                    }
+                    .contentShape(Rectangle())
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+
             RGDisclaimerNote(text: "General information, not medical advice. If something on your skin worries you, or does not settle, speak to a pharmacist, doctor or dermatologist.")
         }
     }
@@ -417,6 +470,8 @@ struct RGMethodDetailView: View {
             !store.sessions(zoneID: zid, methodID: m.id).isEmpty
         }
         let colour = RGTheme.chip(m.chipIndex)
+        let methodCards = RGCareLibrary.forMethod(m.id)
+        let methodSources = RGSourceCatalog.union(of: methodCards)
 
         return RGSubScreen(title: m.name, subtitle: subtitle(m, count: sessions.count)) {
             RGCard(accent: colour) {
@@ -499,11 +554,26 @@ struct RGMethodDetailView: View {
             }
 
             RGSectionHeader(text: "Related care cards")
-            ForEach(RGCareLibrary.forMethod(m.id)) { card in
+            ForEach(methodCards) { card in
                 NavigationLink(destination: RGCareCardView(card: card)) {
                     RGCareCardRow(card: card)
                 }
                 .buttonStyle(PlainButtonStyle())
+            }
+
+            if !methodSources.isEmpty {
+                RGSectionHeader(text: "Sources for this method",
+                                detail: "\(methodSources.count)")
+                RGCard(accent: RGTheme.slateBlue) {
+                    Text("The irritation profile and technique notes above, and the cards listed with them, are written from the published guidance below. Tap any entry to open the original page.")
+                        .font(RGFont.body(11.5))
+                        .foregroundColor(RGTheme.inkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ForEach(Array(methodSources.enumerated()), id: \.element.id) { pair in
+                        RGDivider()
+                        RGSourceRow(source: pair.element, index: pair.offset + 1)
+                    }
+                }
             }
 
             RGDisclaimerNote()

@@ -125,7 +125,14 @@ struct RGSettingsView: View {
             RGSectionHeader(text: "Reference")
             NavigationLink(destination: RGCareLibraryView()) {
                 settingsRow(title: "Care card library",
-                            detail: "\(RGCareLibrary.all.count) entries, searchable",
+                            detail: "\(RGCareLibrary.all.count) entries, searchable, each with citations",
+                            glyph: .book)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            NavigationLink(destination: RGSourceListView()) {
+                settingsRow(title: "Sources and references",
+                            detail: "\(RGSourceCatalog.all.count) cited sources behind the care cards",
                             glyph: .book)
             }
             .buttonStyle(PlainButtonStyle())
@@ -150,6 +157,15 @@ struct RGSettingsView: View {
                     .font(RGFont.heading(14))
                     .foregroundColor(RGTheme.ink)
                 Text("Regrowth Clock records what you choose to record and does arithmetic on it. It does not diagnose anything, it does not tell you what is wrong with your skin, and nothing in it replaces a conversation with a qualified clinician. Reference intervals and care notes are general published guidance, written for a general reader, and they are not personal instructions. If something on your skin is painful, spreading, bleeding, not settling, or simply worrying you, speak to a pharmacist, doctor or dermatologist.")
+                    .font(RGFont.body(12.5))
+                    .foregroundColor(RGTheme.inkSoft)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                RGDivider()
+                Text("Where the guidance comes from")
+                    .font(RGFont.heading(13))
+                    .foregroundColor(RGTheme.ink)
+                Text("Every care card is written from published sources: national health services, dermatology associations, medicine and device regulators, and peer-reviewed literature. Each card lists its own citations, and all \(RGSourceCatalog.all.count) of them are collected under Sources and references above.")
                     .font(RGFont.body(12.5))
                     .foregroundColor(RGTheme.inkSoft)
                     .lineSpacing(2)
@@ -399,6 +415,7 @@ struct RGAboutView: View {
                 RGStatRow(label: "Zones", value: "\(RGZoneCatalog.all.count)")
                 RGStatRow(label: "Methods", value: "\(RGMethodCatalog.all.count)")
                 RGStatRow(label: "Care cards", value: "\(RGCareLibrary.all.count)")
+                RGStatRow(label: "Cited sources", value: "\(RGSourceCatalog.all.count)")
                 RGStatRow(label: "Skin reactions tracked", value: "\(RGReaction.allCases.count)")
                 RGStatRow(label: "Your sessions", value: "\(store.sessions.count)", accent: RGTheme.sageDeep)
             }

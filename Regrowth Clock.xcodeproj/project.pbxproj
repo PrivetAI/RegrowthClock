@@ -16,6 +16,7 @@
 		473DAA6956BF638B8E085A6D /* RegrowthClockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9A572D72082D0D67710E7DC /* RegrowthClockApp.swift */; };
 		53F8012228BB885CCA4A56B9 /* RGIntervalEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3459DDA711DF9E7F7B471DD /* RGIntervalEngine.swift */; };
 		69606D1F844A5AF3A56E8635 /* RGCareCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C9812758BDB8FFB86391CC6 /* RGCareCards.swift */; };
+		C0DEBF515055524345501A00 /* RGSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0DEFA515055524345501A00 /* RGSources.swift */; };
 		77C40A90B4C9F98A4D186D03 /* RGStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A72FCF13F5C219E3CB6DC86 /* RGStore.swift */; };
 		7BE131EAE62ACEA877B33AAC /* RGZoneDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9F52FB33F7CAAF3577759A0 /* RGZoneDetailView.swift */; };
 		8B538DBCAC2A680A09D80191 /* RGCharts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EB73F3B5DF870343D23E005 /* RGCharts.swift */; };
@@ -42,6 +43,7 @@
 		467A8964C37B6EEF00F06201 /* RGSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGSettingsView.swift; sourceTree = "<group>"; };
 		4B5E528AC7A939D8AF09296E /* RGProductEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGProductEditor.swift; sourceTree = "<group>"; };
 		4C9812758BDB8FFB86391CC6 /* RGCareCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGCareCards.swift; sourceTree = "<group>"; };
+		C0DEFA515055524345501A00 /* RGSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGSources.swift; sourceTree = "<group>"; };
 		5614A7E4969CF61EE110248E /* RGZonesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGZonesView.swift; sourceTree = "<group>"; };
 		561AACAE64D527EAEA3E31D2 /* RGLoadingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RGLoadingScreen.swift; sourceTree = "<group>"; };
 		5E4199C284C0DC80A2835F03 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -90,6 +92,7 @@
 				FBDE47E1680EC94D8042CDB1 /* Info.plist */,
 				F9A572D72082D0D67710E7DC /* RegrowthClockApp.swift */,
 				4C9812758BDB8FFB86391CC6 /* RGCareCards.swift */,
+				C0DEFA515055524345501A00 /* RGSources.swift */,
 				6420B1EBA4393E44D1B6B92A /* RGCareLibraryView.swift */,
 				3EB73F3B5DF870343D23E005 /* RGCharts.swift */,
 				BDBD2FF1D58FE9E34070F68C /* RGComponents.swift */,
@@ -189,6 +192,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				69606D1F844A5AF3A56E8635 /* RGCareCards.swift in Sources */,
+				C0DEBF515055524345501A00 /* RGSources.swift in Sources */,
 				FED690BF1831140E15BA582C /* RGCareLibraryView.swift in Sources */,
 				8B538DBCAC2A680A09D80191 /* RGCharts.swift in Sources */,
 				FFD94F7B01312C3981B0BE76 /* RGComponents.swift in Sources */,

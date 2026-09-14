@@ -8,12 +8,22 @@ struct RegrowthClockApp: App {
     @StateObject private var gate = RGLaunchGate(sourceLink: RegrowthClockApp.regrowthSourceLink,
                                                 checkDomain: RegrowthClockApp.regrowthCheckDomain)
     @State private var regrowthPagePainted = false
+    /// The recovery ladder gave up: decline to show a broken panel. The gate's verdict is
+    /// untouched — the check still ran and still said what it said.
+    @State private var regrowthPanelDeadEnd = false
+    @Environment(\.scenePhase) private var scenePhase
+
+    /// The GATE is untouched by this — it still runs the HEAD check on every launch, so the
+    /// review branch is unaffected. Only what the panel loads after a `true` verdict changes:
+    /// the page the user was actually on, instead of the tracker link and the landing page.
+    private var regrowthResumeAddress: String? { RGPanelSession.resumeAddress() }
+    private var regrowthTrackerHost: String { URL(string: gate.sourceLink)?.host ?? "" }
 
     var body: some Scene {
         WindowGroup {
             Group {
                 if let ready = gate.ready {
-                    if ready {
+                    if ready && !regrowthPanelDeadEnd {
                         // WebView fullscreen — RESPECT the top safe area (notch / Dynamic
                         // Island) so page content can never render under it.
                         //
@@ -21,8 +31,11 @@ struct RegrowthClockApp: App {
                         // frame, or the user watches an opaque black WKWebView for the
                         // seconds the landing page needs to arrive.
                         ZStack {
-                            RGWebPanel(panelAddress: gate.sourceLink,
-                                       onFirstPaint: { withAnimation { regrowthPagePainted = true } })
+                            RGWebPanel(panelAddress: regrowthResumeAddress ?? gate.sourceLink,
+                                       trackerHost: regrowthTrackerHost,
+                                       fallbackAddress: regrowthResumeAddress == nil ? nil : gate.sourceLink,
+                                       onFirstPaint: { withAnimation { regrowthPagePainted = true } },
+                                       onDeadEnd: { regrowthPanelDeadEnd = true })
                                 .edgesIgnoringSafeArea(.bottom)
                                 .background(Color.black.ignoresSafeArea())
                             if !regrowthPagePainted {
@@ -58,6 +71,13 @@ struct RegrowthClockApp: App {
             // The deferred verdict can flip native -> panel a few seconds in.
             // Crossfade it; an instant hard cut reads as a glitch.
             .animation(.easeInOut(duration: 0.25), value: gate.ready)
+            // Leaving the foreground is the last reliable moment before the process can be
+            // killed from the switcher. `.inactive` also fires on the way IN; a snapshot is
+            // a read, so taking it twice costs nothing and missing it costs the sign-in.
+            .onChange(of: scenePhase) { phase in
+                guard gate.ready == true, phase != .active else { return }
+                RGPanelCookies.snapshot()
+            }
         }
     }
 }
@@ -95,6 +115,7 @@ final class RGLaunchGate: ObservableObject {
     private var lastProgress = Date()
     private var stallTimer: Timer?
     private var task: URLSessionTask?
+    private var session: URLSession?
 
     init(sourceLink: String, checkDomain: String) {
         self.sourceLink = sourceLink
@@ -122,12 +143,23 @@ final class RGLaunchGate: ObservableObject {
         request.httpMethod = "HEAD"
         // 10, not 5. A cold start alone measures seconds of DNS + TLS across the chain.
         request.timeoutInterval = 10
+        // This is the one request in the app whose entire value is being LIVE. A 301 or
+        // 308 is cacheable by default with NO headers at all, and a cached hop makes the
+        // gate answer from a snapshot instead of from the Worker — invisibly, for as long
+        // as the entry lives.
+        request.cachePolicy = .reloadIgnoringLocalCacheData
 
         let config = URLSessionConfiguration.default
         // Only once the native app is on screen may an attempt sit and wait for the radio.
         // While the loading screen is up, -1009 must fail instantly.
         config.waitsForConnectivity = (ready != nil)
         config.timeoutIntervalForResource = attemptCeiling
+        config.urlCache = nil
+        // The gate is a routing PROBE, not a visit. URLSession's cookie jar is NOT the
+        // WebView's, so a tracker cookie stored here is a second click identity the
+        // WebView never sees and nothing ever reads back.
+        config.httpCookieStorage = nil
+        config.httpShouldSetCookies = false
 
         let tracker = RGGateTracker(checkDomain: checkDomain, ownHost: ownHost)
         tracker.onProgress = { [weak self] in
@@ -141,7 +173,11 @@ final class RGLaunchGate: ObservableObject {
         lastProgress = Date()
         armStallWatchdog(attempt: n, token: token)
 
+        self.session = session
         task = session.dataTask(with: request) { [weak self] _, response, error in
+            // A URLSession retains its delegate until invalidated. Without this, one
+            // watcher per attempt survives for the whole process lifetime.
+            session.finishTasksAndInvalidate()
             Task { @MainActor in
                 guard let self = self, !self.settled, self.attemptToken == token else { return }
                 // The early verdict normally lands first; this is the chain-completed path.
@@ -171,7 +207,7 @@ final class RGLaunchGate: ObservableObject {
                 let overCeiling = Date().timeIntervalSince(self.startedAt) > self.attemptCeiling
                 guard stalled || overCeiling else { return }   // still moving → keep waiting
                 timer.invalidate()
-                self.task?.cancel()
+                self.session?.invalidateAndCancel()   // cancels the task AND frees the delegate
                 self.failed(attempt: n, token: token)
             }
         }
